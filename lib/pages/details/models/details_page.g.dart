@@ -34,16 +34,6 @@ class _$DetailsPageSerializer implements StructuredSerializer<DetailsPage> {
           specifiedType: const FullType(double)),
       'stock',
       serializers.serialize(object.stock, specifiedType: const FullType(int)),
-      'tags',
-      serializers.serialize(object.tags,
-          specifiedType:
-              const FullType(BuiltList, const [const FullType(String)])),
-      'brand',
-      serializers.serialize(object.brand,
-          specifiedType: const FullType(String)),
-      'category',
-      serializers.serialize(object.category,
-          specifiedType: const FullType(String)),
       'thumbnail',
       serializers.serialize(object.thumbnail,
           specifiedType: const FullType(String)),
@@ -52,7 +42,29 @@ class _$DetailsPageSerializer implements StructuredSerializer<DetailsPage> {
           specifiedType:
               const FullType(BuiltList, const [const FullType(String)])),
     ];
-
+    Object? value;
+    value = object.tags;
+    if (value != null) {
+      result
+        ..add('tags')
+        ..add(serializers.serialize(value,
+            specifiedType:
+                const FullType(BuiltList, const [const FullType(String)])));
+    }
+    value = object.brand;
+    if (value != null) {
+      result
+        ..add('brand')
+        ..add(serializers.serialize(value,
+            specifiedType: const FullType(String)));
+    }
+    value = object.category;
+    if (value != null) {
+      result
+        ..add('category')
+        ..add(serializers.serialize(value,
+            specifiedType: const FullType(String)));
+    }
     return result;
   }
 
@@ -99,11 +111,11 @@ class _$DetailsPageSerializer implements StructuredSerializer<DetailsPage> {
           break;
         case 'brand':
           result.brand = serializers.deserialize(value,
-              specifiedType: const FullType(String))! as String;
+              specifiedType: const FullType(String)) as String?;
           break;
         case 'category':
           result.category = serializers.deserialize(value,
-              specifiedType: const FullType(String))! as String;
+              specifiedType: const FullType(String)) as String?;
           break;
         case 'thumbnail':
           result.thumbnail = serializers.deserialize(value,
@@ -136,11 +148,11 @@ class _$DetailsPage extends DetailsPage {
   @override
   final int stock;
   @override
-  final BuiltList<String> tags;
+  final BuiltList<String>? tags;
   @override
-  final String brand;
+  final String? brand;
   @override
-  final String category;
+  final String? category;
   @override
   final String thumbnail;
   @override
@@ -156,9 +168,9 @@ class _$DetailsPage extends DetailsPage {
       required this.price,
       required this.rating,
       required this.stock,
-      required this.tags,
-      required this.brand,
-      required this.category,
+      this.tags,
+      this.brand,
+      this.category,
       required this.thumbnail,
       required this.images})
       : super._() {
@@ -169,9 +181,6 @@ class _$DetailsPage extends DetailsPage {
     BuiltValueNullFieldError.checkNotNull(price, r'DetailsPage', 'price');
     BuiltValueNullFieldError.checkNotNull(rating, r'DetailsPage', 'rating');
     BuiltValueNullFieldError.checkNotNull(stock, r'DetailsPage', 'stock');
-    BuiltValueNullFieldError.checkNotNull(tags, r'DetailsPage', 'tags');
-    BuiltValueNullFieldError.checkNotNull(brand, r'DetailsPage', 'brand');
-    BuiltValueNullFieldError.checkNotNull(category, r'DetailsPage', 'category');
     BuiltValueNullFieldError.checkNotNull(
         thumbnail, r'DetailsPage', 'thumbnail');
     BuiltValueNullFieldError.checkNotNull(images, r'DetailsPage', 'images');
@@ -296,7 +305,7 @@ class DetailsPageBuilder implements Builder<DetailsPage, DetailsPageBuilder> {
       _price = $v.price;
       _rating = $v.rating;
       _stock = $v.stock;
-      _tags = $v.tags.toBuilder();
+      _tags = $v.tags?.toBuilder();
       _brand = $v.brand;
       _category = $v.category;
       _thumbnail = $v.thumbnail;
@@ -337,11 +346,9 @@ class DetailsPageBuilder implements Builder<DetailsPage, DetailsPageBuilder> {
                   rating, r'DetailsPage', 'rating'),
               stock: BuiltValueNullFieldError.checkNotNull(
                   stock, r'DetailsPage', 'stock'),
-              tags: tags.build(),
-              brand: BuiltValueNullFieldError.checkNotNull(
-                  brand, r'DetailsPage', 'brand'),
-              category: BuiltValueNullFieldError.checkNotNull(
-                  category, r'DetailsPage', 'category'),
+              tags: _tags?.build(),
+              brand: brand,
+              category: category,
               thumbnail: BuiltValueNullFieldError.checkNotNull(
                   thumbnail, r'DetailsPage', 'thumbnail'),
               images: images.build());
@@ -349,7 +356,7 @@ class DetailsPageBuilder implements Builder<DetailsPage, DetailsPageBuilder> {
       late String _$failedField;
       try {
         _$failedField = 'tags';
-        tags.build();
+        _tags?.build();
 
         _$failedField = 'images';
         images.build();

@@ -39,9 +39,8 @@ class PageGeneral extends StatelessWidget {
           ),
           if (viewBigLogo) const LogoArm(width: 200),
           Expanded(
-            child: SingleChildScrollView(
-              child: body ?? const SizedBox.shrink(),
-            ),
+            child: body ??
+                const SizedBox.shrink(), // ← Quita el SingleChildScrollView
           ),
         ],
       ),

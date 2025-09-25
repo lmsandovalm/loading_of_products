@@ -17,7 +17,7 @@ class ProductDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PageGeneral(
-      isViewLogo: false,
+      isViewLogo: true,
       isViewBack: true,
       body: Stack(
         children: [
@@ -29,9 +29,10 @@ class ProductDetailPage extends StatelessWidget {
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   child: Column(
                     children: [
-                      // tarjeta con detalles (se solapa sobre la imagen)
+                      ProductImageArea(item: item, height: imageHeight),
+                      const SizedBox(height: AppSpaces.m25),
                       ProductDetailsCard(item: item),
-                      const SizedBox(height: 18),
+                      const SizedBox(height: AppSpaces.m15),
                     ],
                   )))
         ],
@@ -69,7 +70,6 @@ class ProductDetailsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // titulo + precio en row
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -123,7 +123,7 @@ class ProductDetailsCard extends StatelessWidget {
               const SizedBox(width: 16),
               const Icon(Icons.branding_watermark, size: 18),
               const SizedBox(width: 6),
-              Text(item.brand),
+              Text(item.brand ?? 'Unknown'),
             ],
           ),
 

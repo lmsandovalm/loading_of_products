@@ -11,27 +11,27 @@ class ProductsDataSource {
     int limit = 30,
     int skip = 0,
   }) async {
-    // var url = Uri.parse('https://dummyjson.com/products');
-    final url =
-        Uri.parse('https://dummyjson.com/products?limit=$limit&skip=$skip');
+    final url = Uri.parse('https://dummyjson.com/products?limit=$limit&skip=$skip');
         
     final response = await client.get(url).timeout(const Duration(seconds: 5),
         onTimeout: () {
       throw ResponseServerException(
           'Timeout al obtener productos', ExcResponse.errorGeneral);
     });
+    
     if (response.statusCode == 200) {
       try {
         final dataJson = json.decode(response.body) as Map<String, dynamic>;
-        
 
-        final responseObject = Home.fromJson(dataJson);
+        final cleanedData = _cleanNullFields(dataJson);
+        
+        final responseObject = Home.fromJson(cleanedData);
 
         if (responseObject != null) {
           return responseObject;
         } else {
           throw ResponseServerException(
-              'Estado false en la respuesta del servidor',
+              'Error al deserializar los productos',
               ExcResponse.errorGeneral);
         }
       } catch (e) {
@@ -44,5 +44,33 @@ class ProductsDataSource {
           'Falla en la solicitud de productos: ${response.statusCode}',
           ExcResponse.errorGeneral);
     }
+  }
+
+  Map<String, dynamic> _cleanNullFields(Map<String, dynamic> data) {
+    final cleaned = Map<String, dynamic>.from(data);
+    
+    if (cleaned.containsKey('products') && cleaned['products'] is List) {
+      final products = (cleaned['products'] as List).map((product) {
+        if (product is Map<String, dynamic>) {
+          return _cleanProductNullFields(product);
+        }
+        return product;
+      }).toList();
+      
+      cleaned['products'] = products;
+    }
+    
+    return cleaned;
+  }
+
+  Map<String, dynamic> _cleanProductNullFields(Map<String, dynamic> product) {
+    final cleanedProduct = Map<String, dynamic>.from(product);
+    
+    cleanedProduct['brand'] ??= 'Unknown Brand';
+    cleanedProduct['category'] ??= 'Uncategorized';
+    cleanedProduct['tags'] ??= [];
+    cleanedProduct['images'] ??= [];
+    
+    return cleanedProduct;
   }
 }

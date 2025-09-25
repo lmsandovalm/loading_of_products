@@ -129,7 +129,7 @@ class ProductsCubit extends Cubit<ProductsState> {
   void filterProductsByTitle(String searchText) {
     if (state is ProductsSuccess) {
       if (searchText.isEmpty) {
-        emit(ProductsSuccess(products: _allProducts));
+        getProducts(page: 0);
         return;
       }
 
@@ -137,7 +137,13 @@ class ProductsCubit extends Cubit<ProductsState> {
         return product.title.toLowerCase().contains(searchText.toLowerCase());
       }).toList();
 
-      emit(ProductsSuccess(products: filteredProducts));
+      emit(ProductsSuccess(
+        products: filteredProducts,
+        currentPage: _currentPage,
+        totalProducts: _totalProducts,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      ));
     }
   }
 
@@ -151,7 +157,13 @@ class ProductsCubit extends Cubit<ProductsState> {
         if (homeResponse.data.isNotEmpty) {
           final newProducts = homeResponse.data.toList();
           _allProducts.addAll(newProducts);
-          emit(ProductsSuccess(products: _allProducts));
+          emit(ProductsSuccess(
+            products: _allProducts,
+            currentPage: _currentPage,
+            totalProducts: _totalProducts + newProducts.length,
+            hasNextPage: true,
+            hasPreviousPage: _currentPage > 0,
+          ));
         }
       }
     } catch (e) {
@@ -163,18 +175,21 @@ class ProductsCubit extends Cubit<ProductsState> {
   void filterBlogWithOptions(FilterOptions options) {
     if (state is ProductsSuccess) {
       if (options.isEmpty) {
-        emit(ProductsSuccess(products: _allProducts));
+        getProducts(page: 0);
         return;
       }
 
       final filteredProducts = _allProducts.where((product) {
+        final productCategory = product.category ?? '';
+        final productBrand = product.brand ?? '';
+
         bool categoryMatch = options.category.isEmpty ||
-            product.category
+            productCategory
                 .toLowerCase()
                 .contains(options.category.toLowerCase());
 
         bool brandMatch = options.brand.isEmpty ||
-            product.brand.toLowerCase().contains(options.brand.toLowerCase());
+            productBrand.toLowerCase().contains(options.brand.toLowerCase());
 
         if (options.filterType == FilterType.and) {
           return categoryMatch && brandMatch;
@@ -183,7 +198,13 @@ class ProductsCubit extends Cubit<ProductsState> {
         }
       }).toList();
 
-      emit(ProductsSuccess(products: filteredProducts));
+      emit(ProductsSuccess(
+        products: filteredProducts,
+        currentPage: _currentPage,
+        totalProducts: _totalProducts,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      ));
     }
   }
 }

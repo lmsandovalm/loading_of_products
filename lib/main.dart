@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:prueba_tecnica_flutter/core/styles/app_colors.dart';
 import 'package:prueba_tecnica_flutter/pages/home/products_page_general.dart';
-import 'package:prueba_tecnica_flutter/widgets/page_general.dart';
 
 void main() {
   runApp(const MyApp());

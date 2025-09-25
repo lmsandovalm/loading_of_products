@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:prueba_tecnica_flutter/core/styles/app_colors.dart';
@@ -18,17 +20,19 @@ class ProductsGeneralPage extends StatelessWidget {
       create: (context) => ProductsCubit(ProductsDataSource())..getProducts(),
       child: Scaffold(
         body: PageGeneral(
-          title: 'Products',
           isViewLogo: true,
           isViewBack: false,
           body: Column(
             children: [
               const SizedBox(height: AppSpaces.m25),
-              const SearchWidget(), // Widget de búsqueda
+              const SearchWidget(),
               const SizedBox(height: AppSpaces.m25),
               Expanded(
-                child: _buildProductsList(), // Lista de productos
+                child: _buildProductsList(),
               ),
+              const SizedBox(height: AppSpaces.m15),
+              const PaginationControls(), // Botones de paginación
+              const SizedBox(height: AppSpaces.m15),
             ],
           ),
         ),
@@ -50,12 +54,13 @@ class ProductsGeneralPage extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.error_outline, color: AppColors.skyblue, size: 50),
+                const Icon(Icons.error_outline,
+                    color: AppColors.skyblue, size: 50),
                 const SizedBox(height: AppSpaces.m10),
                 Text(
                   'Error: ${state.error}',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(color: AppColors.darkgray),
+                  style: const TextStyle(color: AppColors.lila),
                 ),
                 const SizedBox(height: AppSpaces.m25),
                 ElevatedButton(
@@ -89,9 +94,69 @@ class ProductsGeneralPage extends StatelessWidget {
           );
         }
 
-        // Estado inicial
         return const Center(
           child: Text('Cargando productos...'),
+        );
+      },
+    );
+  }
+}
+
+class PaginationControls extends StatelessWidget {
+  const PaginationControls({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<ProductsCubit, ProductsState>(
+      builder: (context, state) {
+        if (state is! ProductsSuccess) {
+          return const SizedBox.shrink();
+        }
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpaces.m25),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Botón Anterior
+              ElevatedButton.icon(
+                onPressed: state.hasPreviousPage
+                    ? () => context.read<ProductsCubit>().previousPage()
+                    : null,
+                icon: const Icon(Icons.arrow_back_ios, size: 16),
+                label: const Text('Antras'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                      state.hasPreviousPage ? AppColors.lila : Colors.grey,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+
+              // Información de página
+              Text(
+                'Pág. ${state.currentPage + 1} '
+                '( de ${(state.totalProducts / 10).ceil()})',
+                style: const TextStyle(
+                  color: AppColors.darkgray,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              // Botón Siguiente
+              ElevatedButton.icon(
+                onPressed: state.hasNextPage
+                    ? () => context.read<ProductsCubit>().nextPage()
+                    : null,
+                icon: const Icon(Icons.arrow_forward_ios, size: 16),
+                label: const Text('Sig.'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                      state.hasNextPage ? AppColors.lila : Colors.grey,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ],
+          ),
         );
       },
     );
@@ -112,6 +177,7 @@ class _SearchWidgetState extends State<SearchWidget> {
   @override
   void dispose() {
     _searchController.dispose();
+    _debouncer.dispose();
     super.dispose();
   }
 
@@ -187,23 +253,21 @@ class TotalProducts extends StatelessWidget {
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // Imagen
             Expanded(
               flex: 4,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(15),
-                child: (item.thumbnail != null && item.thumbnail.isNotEmpty)
+                child: (item.thumbnail.isNotEmpty)
                     ? Image.network(
                         item.thumbnail,
                         fit: BoxFit.cover,
-                        height: 110,
                         width: double.infinity,
                         loadingBuilder: (context, child, loadingProgress) {
                           if (loadingProgress == null) return child;
                           return Container(
-                            height: 110,
                             color: AppColors.greyLight,
                             child: const Center(
                               child: CircularProgressIndicator(),
@@ -214,19 +278,17 @@ class TotalProducts extends StatelessWidget {
                             Image.asset(
                           'assets/images/background_home.png',
                           fit: BoxFit.cover,
+                          width: double.infinity,
                         ),
                       )
                     : Image.asset(
                         'assets/images/background_home.png',
                         fit: BoxFit.cover,
-                        height: 110,
                         width: double.infinity,
                       ),
               ),
             ),
-
             const SizedBox(width: AppSpaces.m15),
-
             // Detalles
             Expanded(
               flex: 6,
@@ -250,17 +312,16 @@ class TotalProducts extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: AppSpaces.m10),
-                    
                     // Marca y Categoría
                     Text(
-                      '${item.brand} • ${item.category}',
+                      '${item.brand ?? 'Unknown'} • ${item.category ?? 'Uncategorized'}',
                       style: const TextStyle(
                         color: AppColors.darkgray,
                         fontSize: 12,
                       ),
                     ),
                     const SizedBox(height: AppSpaces.m5),
-                    
+
                     // Precio
                     Text(
                       '\$${item.price.toStringAsFixed(2)}',
@@ -271,7 +332,7 @@ class TotalProducts extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: AppSpaces.m5),
-                    
+
                     // Rating y Stock
                     Row(
                       children: [
@@ -285,7 +346,8 @@ class TotalProducts extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 10),
-                        const Icon(Icons.inventory, color: Colors.green, size: 16),
+                        const Icon(Icons.inventory,
+                            color: Colors.green, size: 16),
                         const SizedBox(width: 4),
                         Text(
                           '${item.stock} units',
@@ -297,7 +359,7 @@ class TotalProducts extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: AppSpaces.m10),
-                    
+
                     const Align(
                       alignment: Alignment.bottomLeft,
                       child: Text(
@@ -320,18 +382,22 @@ class TotalProducts extends StatelessWidget {
   }
 }
 
-// Debouncer para optimizar la búsqueda
 class _Debouncer {
   final int milliseconds;
-  VoidCallback? _callback;
+  Timer? _timer;
 
   _Debouncer({required this.milliseconds});
 
   void run(VoidCallback callback) {
-    _callback?.cancel();
-    _callback = callback;
-    Future.delayed(Duration(milliseconds: milliseconds), () {
-      _callback?.call();
-    });
+    _timer?.cancel();
+    _timer = Timer(Duration(milliseconds: milliseconds), callback);
+  }
+
+  void cancel() {
+    _timer?.cancel();
+  }
+
+  void dispose() {
+    _timer?.cancel();
   }
 }

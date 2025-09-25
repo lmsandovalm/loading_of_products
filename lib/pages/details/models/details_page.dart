@@ -29,13 +29,13 @@ abstract class DetailsPage implements Built<DetailsPage, DetailsPageBuilder> {
   int get stock;
 
   @BuiltValueField(wireName: 'tags')
-  BuiltList<String> get tags;
+  BuiltList<String>? get tags;
 
   @BuiltValueField(wireName: 'brand')
-  String get brand;
+  String? get brand;
 
   @BuiltValueField(wireName: 'category')
-  String get category;
+  String? get category;
 
   @BuiltValueField(wireName: 'thumbnail')
   String get thumbnail;
