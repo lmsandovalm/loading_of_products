@@ -1,4 +1,3 @@
-// lib/src/presentation/widgets/theme_provider.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:prueba_tecnica_flutter/core/utils/theme_mode.dart';
@@ -7,7 +6,7 @@ import 'package:prueba_tecnica_flutter/logic/theme_logic.dart';
 
 class ThemeProvider extends StatelessWidget {
   final Widget child;
-  
+
   const ThemeProvider({super.key, required this.child});
 
   @override
@@ -16,18 +15,21 @@ class ThemeProvider extends StatelessWidget {
       create: (context) => ThemeCubit()..loadTheme(),
       child: BlocBuilder<ThemeCubit, ThemeState>(
         builder: (context, state) {
+          ThemeMode effectiveThemeMode;
+          ThemeOptions themeOptions;
+
           if (state is ThemeLoaded) {
-            return MaterialApp(
-              theme: _buildLightTheme(state.themeOptions),
-              darkTheme: _buildDarkTheme(state.themeOptions),
-              themeMode: state.themeOptions.themeMode.toThemeMode,
-              home: child,
-            );
+            themeOptions = state.themeOptions;
+            effectiveThemeMode = state.forcedTheme ?? state.themeOptions.themeMode.toThemeMode;
+          } else {
+            themeOptions = const ThemeOptions();
+            effectiveThemeMode = ThemeMode.system;
           }
-          
-          // Mientras carga el tema, mostrar loading o tema por defecto
+
           return MaterialApp(
-            theme: _buildLightTheme(const ThemeOptions()),
+            theme: _buildLightTheme(themeOptions),
+            darkTheme: _buildDarkTheme(themeOptions),
+            themeMode: effectiveThemeMode,
             home: child,
           );
         },
@@ -39,7 +41,6 @@ class ThemeProvider extends StatelessWidget {
     return ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.light(
-        primary: options.primaryColor,
         secondary: options.secondaryColor,
       ),
       brightness: Brightness.light,
@@ -50,7 +51,6 @@ class ThemeProvider extends StatelessWidget {
     return ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.dark(
-        primary: options.primaryColor,
         secondary: options.secondaryColor,
       ),
       brightness: Brightness.dark,

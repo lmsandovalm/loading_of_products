@@ -1,6 +1,7 @@
-// lib/src/presentation/cubits/theme_cubit.dart
+// theme_logic.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:prueba_tecnica_flutter/core/styles/app_colors.dart';
 import 'package:prueba_tecnica_flutter/core/utils/theme_mode.dart';
 import 'package:prueba_tecnica_flutter/core/utils/theme_options.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,14 +15,15 @@ class ThemeInitial extends ThemeState {
 }
 
 class ThemeLoaded extends ThemeState {
-  const ThemeLoaded({required this.themeOptions});
-  
+  const ThemeLoaded({required this.themeOptions, this.forcedTheme});
+
   final ThemeOptions themeOptions;
+  final ThemeMode? forcedTheme;
 }
 
 class ThemeCubit extends Cubit<ThemeState> {
   ThemeCubit() : super(const ThemeInitial());
-  
+
   static const String _themePreferenceKey = 'app_theme_mode';
   static const String _primaryColorKey = 'primary_color';
   static const String _secondaryColorKey = 'secondary_color';
@@ -30,39 +32,62 @@ class ThemeCubit extends Cubit<ThemeState> {
   Future<void> loadTheme() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      
-      final themeIndex = prefs.getInt(_themePreferenceKey) ?? 2; // system por defecto
-      final primaryColorValue = prefs.getInt(_primaryColorKey) ?? Colors.white.value;
-      final secondaryColorValue = prefs.getInt(_secondaryColorKey) ?? Colors.black.value;
+
+      final themeIndex = prefs.getInt('theme_mode') ?? 0;
+      final primaryColorValue = prefs.getInt(_primaryColorKey) ??
+          AppColors.lila.value; // CAMBIO: lila por defecto
+      final secondaryColorValue =
+          prefs.getInt(_secondaryColorKey) ?? Colors.orange.value;
       final useDynamicColor = prefs.getBool(_dynamicColorKey) ?? false;
-      
+
       final themeOptions = ThemeOptions(
         themeMode: AppThemeMode.values[themeIndex],
         primaryColor: Color(primaryColorValue),
         secondaryColor: Color(secondaryColorValue),
         useDynamicColor: useDynamicColor,
       );
-      
+
       emit(ThemeLoaded(themeOptions: themeOptions));
     } catch (e) {
-      // En caso de error, usar tema por defecto
-      emit(const ThemeLoaded(themeOptions: ThemeOptions()));
+      emit(const ThemeLoaded(
+          themeOptions: ThemeOptions(
+      )));
     }
   }
 
   Future<void> changeTheme(ThemeOptions newOptions) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      
+
       await prefs.setInt(_themePreferenceKey, newOptions.themeMode.index);
       await prefs.setInt(_primaryColorKey, newOptions.primaryColor.value);
       await prefs.setInt(_secondaryColorKey, newOptions.secondaryColor.value);
       await prefs.setBool(_dynamicColorKey, newOptions.useDynamicColor);
-      
+
+      print('Tema guardado: ${newOptions.themeMode.name}');
       emit(ThemeLoaded(themeOptions: newOptions));
     } catch (e) {
-      // Manejar error sin emitir nuevo estado
       print('Error saving theme: $e');
+    }
+  }
+
+  void forceTheme(ThemeMode? forcedTheme) {
+    if (state is ThemeLoaded) {
+      final currentState = state as ThemeLoaded;
+      emit(ThemeLoaded(
+        themeOptions: currentState.themeOptions,
+        forcedTheme: forcedTheme,
+      ));
+    }
+  }
+
+  void restoreTheme() {
+    if (state is ThemeLoaded) {
+      final currentState = state as ThemeLoaded;
+      emit(ThemeLoaded(
+        themeOptions: currentState.themeOptions,
+        forcedTheme: null,
+      ));
     }
   }
 
@@ -70,6 +95,7 @@ class ThemeCubit extends Cubit<ThemeState> {
     if (state is ThemeLoaded) {
       final currentOptions = (state as ThemeLoaded).themeOptions;
       final newOptions = currentOptions.copyWith(themeMode: themeMode);
+
       changeTheme(newOptions);
     }
   }
@@ -85,7 +111,19 @@ class ThemeCubit extends Cubit<ThemeState> {
   void toggleDynamicColor() {
     if (state is ThemeLoaded) {
       final currentOptions = (state as ThemeLoaded).themeOptions;
-      final newOptions = currentOptions.copyWith(useDynamicColor: !currentOptions.useDynamicColor);
+      final newOptions = currentOptions.copyWith(
+          useDynamicColor: !currentOptions.useDynamicColor);
+      changeTheme(newOptions);
+    }
+  }
+
+  void changeThemeColors(Color primary, Color secondary) {
+    if (state is ThemeLoaded) {
+      final currentOptions = (state as ThemeLoaded).themeOptions;
+      final newOptions = currentOptions.copyWith(
+        primaryColor: primary,
+        secondaryColor: secondary,
+      );
       changeTheme(newOptions);
     }
   }

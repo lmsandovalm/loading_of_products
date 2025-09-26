@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:prueba_tecnica_flutter/core/styles/app_colors.dart';
 import 'package:prueba_tecnica_flutter/core/utils/theme_mode.dart';
 
 class ThemeOptions {
@@ -6,14 +7,14 @@ class ThemeOptions {
   final Color primaryColor;
   final Color secondaryColor;
   final bool useDynamicColor;
-  
+
   const ThemeOptions({
-    this.themeMode = AppThemeMode.system,
-    this.primaryColor = Colors.white,
+    this.themeMode = AppThemeMode.light,
+    this.primaryColor = AppColors.white,
     this.secondaryColor = Colors.black,
     this.useDynamicColor = false,
   });
-  
+
   ThemeOptions copyWith({
     AppThemeMode? themeMode,
     Color? primaryColor,
@@ -27,18 +28,18 @@ class ThemeOptions {
       useDynamicColor: useDynamicColor ?? this.useDynamicColor,
     );
   }
-  
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    
+
     return other is ThemeOptions &&
         other.themeMode == themeMode &&
         other.primaryColor == primaryColor &&
         other.secondaryColor == secondaryColor &&
         other.useDynamicColor == useDynamicColor;
   }
-  
+
   @override
   int get hashCode {
     return themeMode.hashCode ^

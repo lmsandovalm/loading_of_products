@@ -4,8 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:prueba_tecnica_flutter/datasource/products_datasouce.dart';
-import 'package:prueba_tecnica_flutter/pages/home/models/home_page.dart';
-import 'package:built_collection/built_collection.dart'; // ← Importa BuiltList
+import 'package:prueba_tecnica_flutter/pages/home/models/home_page.dart';// ← Importa BuiltList
 
 @GenerateMocks([http.Client])
 import 'products_datasource_test.mocks.dart' as mock_file;
@@ -50,7 +49,7 @@ void main() {
       ''';
 
       when(mockHttpClient
-              .get(Uri.parse('https://dummyjson.com/products?limit=30&skip=0')))
+              .get(Uri.parse('https://dummyjson.com/products')))
           .thenAnswer((_) async => http.Response(mockResponse, 200));
 
       // ACT

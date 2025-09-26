@@ -32,6 +32,9 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.8
+
+  # Used to display markdown
+  flutter_markdown: ^0.7.0
   
 #Used to save user preferences
   shared_preferences: ^2.2.2 
@@ -46,8 +49,6 @@ dependencies:
   # Used to make HTTP requests
   http: ^1.5.0
 
-  # Used to user SVG format
-  flutter_svg: ^2.1.0
   # Used to convert JSON in Objets
   built_value: ^8.9.5
   flutter_localization: ^0.3.2
@@ -56,12 +57,11 @@ dependencies:
   connectivity_plus: ^6.1.4
   internet_connection_checker_plus: ^2.7.1
 
-  #Used to responsive
-  sizer: ^3.0.5
 
   #Local data base
   hive: ^2.2.3
   hive_flutter: ^1.1.0
+  shimmer: ^3.0.0
 
 
 
@@ -69,11 +69,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided by the package is
-  # activated in the `analysis_options.yaml` file located at the root of your
-  # package. See that file for information about deactivating specific lint
-  # rules and activating additional ones.
+ 
   flutter_lints: ^4.0.0
 
   mockito: ^5.4.0
@@ -90,9 +86,7 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
 
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
+
   uses-material-design: true
 
   assets:

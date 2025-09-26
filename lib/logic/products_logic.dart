@@ -1,5 +1,6 @@
 import 'package:prueba_tecnica_flutter/core/utils/filter_products.dart';
 import 'package:prueba_tecnica_flutter/core/utils/internet_util.dart';
+import 'package:prueba_tecnica_flutter/core/utils/sort_type.dart';
 import 'package:prueba_tecnica_flutter/datasource/products_datasouce.dart';
 import 'package:prueba_tecnica_flutter/models/exception/general_exception.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -58,9 +59,13 @@ class ProductsCubit extends Cubit<ProductsState> {
 
   final ProductsDataSource _productsdatasource;
   List<DetailsPage> _allProducts = [];
+  List<DetailsPage> _allAvailableProducts = [];
   int _currentPage = 0;
   int _totalProducts = 0;
   final int _pageSize = 10;
+  bool _allProductsLoaded = false;
+  FilterOptions _currentFilters = FilterOptions();
+  SortType _currentSortType = SortType.none;
 
   Future<void> getProducts({int page = 0}) async {
     emit(const ProductsLoading());
@@ -78,11 +83,13 @@ class ProductsCubit extends Cubit<ProductsState> {
 
         if (homeResponse.data.isNotEmpty) {
           listProductsTotal = homeResponse.data.toList();
+          _allAvailableProducts.addAll(listProductsTotal);
         }
 
         _allProducts = listProductsTotal;
         _currentPage = page;
         _totalProducts = homeResponse.total;
+        _allProductsLoaded = _allAvailableProducts.length >= _totalProducts;
 
         emit(ProductsSuccess(
           products: _allProducts,
@@ -93,6 +100,7 @@ class ProductsCubit extends Cubit<ProductsState> {
         ));
       } else {
         _allProducts = [];
+        _allAvailableProducts = [];
         emit(const ProductsSuccess(
           products: <DetailsPage>[],
           currentPage: 0,
@@ -103,6 +111,35 @@ class ProductsCubit extends Cubit<ProductsState> {
       }
     } catch (e) {
       _allProducts = [];
+      _allAvailableProducts = [];
+      emit(ProductsServerError(
+          error: e.toString(), typeError: ExcResponse.unknown));
+    }
+  }
+
+  Future<void> loadAllProducts() async {
+    if (_allProductsLoaded) return;
+
+    emit(const ProductsLoading());
+    try {
+      final Home homeResponse = await _productsdatasource.getProducts(
+        limit: _totalProducts,
+        skip: 0,
+      );
+
+      if (homeResponse.data.isNotEmpty) {
+        _allAvailableProducts = homeResponse.data.toList();
+        _allProductsLoaded = true;
+
+        emit(ProductsSuccess(
+          products: _allAvailableProducts,
+          currentPage: 0,
+          totalProducts: _allAvailableProducts.length,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        ));
+      }
+    } catch (e) {
       emit(ProductsServerError(
           error: e.toString(), typeError: ExcResponse.unknown));
     }
@@ -126,24 +163,56 @@ class ProductsCubit extends Cubit<ProductsState> {
     }
   }
 
-  void filterProductsByTitle(String searchText) {
-    if (state is ProductsSuccess) {
-      if (searchText.isEmpty) {
-        getProducts(page: 0);
-        return;
-      }
+  Future<void> filterProductsByTitle(String searchText) async {
+    if (searchText.isEmpty) {
+      await getProducts(page: 0);
+      return;
+    }
 
-      final filteredProducts = _allProducts.where((product) {
+    if (!_allProductsLoaded) {
+      await loadAllProducts();
+    }
+
+    final filteredProducts = _allAvailableProducts.where((product) {
+      return product.title.toLowerCase().contains(searchText.toLowerCase());
+    }).toList();
+
+    emit(ProductsSuccess(
+      products: filteredProducts,
+      currentPage: 0,
+      totalProducts: filteredProducts.length,
+      hasNextPage: false,
+      hasPreviousPage: false,
+    ));
+  }
+
+  Future<void> searchAllProductsByTitle(String searchText) async {
+    if (searchText.isEmpty) {
+      await getProducts(page: 0);
+      return;
+    }
+
+    emit(const ProductsLoading());
+    try {
+      final Home homeResponse = await _productsdatasource.getProducts(
+        limit: 300,
+        skip: 0,
+      );
+      final allProducts = homeResponse.data.toList();
+      final filteredProducts = allProducts.where((product) {
         return product.title.toLowerCase().contains(searchText.toLowerCase());
       }).toList();
 
       emit(ProductsSuccess(
         products: filteredProducts,
-        currentPage: _currentPage,
-        totalProducts: _totalProducts,
+        currentPage: 0,
+        totalProducts: filteredProducts.length,
         hasNextPage: false,
         hasPreviousPage: false,
       ));
+    } catch (e) {
+      emit(ProductsServerError(
+          error: e.toString(), typeError: ExcResponse.unknown));
     }
   }
 
@@ -172,39 +241,149 @@ class ProductsCubit extends Cubit<ProductsState> {
     }
   }
 
-  void filterBlogWithOptions(FilterOptions options) {
+  void filterProductsWithOptions(FilterOptions options) {
     if (state is ProductsSuccess) {
       if (options.isEmpty) {
-        getProducts(page: 0);
+        _currentFilters = FilterOptions();
+        _currentSortType = SortType.none;
+        _applyFiltersAndSort();
         return;
       }
 
-      final filteredProducts = _allProducts.where((product) {
+      _currentFilters = options;
+      _applyFiltersAndSort();
+    }
+  }
+
+  Future<void> applyFilters(FilterOptions filters) async {
+    _currentFilters = filters;
+    await _applyFiltersAndSort();
+  }
+
+  Future<void> sortProducts(SortType sortType) async {
+    _currentSortType = sortType;
+    await _applyFiltersAndSort();
+  }
+
+  Future<void> _applyFiltersAndSort() async {
+    if (_allAvailableProducts.isEmpty) {
+      await getProducts(page: 0);
+      return;
+    }
+
+    List<DetailsPage> filteredProducts = _allAvailableProducts;
+
+    if (!_currentFilters.isEmpty) {
+      filteredProducts = filteredProducts.where((product) {
         final productCategory = product.category ?? '';
         final productBrand = product.brand ?? '';
 
-        bool categoryMatch = options.category.isEmpty ||
+        bool categoryMatch = _currentFilters.category.isEmpty ||
             productCategory
                 .toLowerCase()
-                .contains(options.category.toLowerCase());
+                .contains(_currentFilters.category.toLowerCase());
 
-        bool brandMatch = options.brand.isEmpty ||
-            productBrand.toLowerCase().contains(options.brand.toLowerCase());
+        bool brandMatch = _currentFilters.brand.isEmpty ||
+            productBrand
+                .toLowerCase()
+                .contains(_currentFilters.brand.toLowerCase());
 
-        if (options.filterType == FilterType.and) {
+        if (_currentFilters.filterType == FilterType.and) {
           return categoryMatch && brandMatch;
         } else {
           return categoryMatch || brandMatch;
         }
       }).toList();
+    }
 
-      emit(ProductsSuccess(
-        products: filteredProducts,
-        currentPage: _currentPage,
-        totalProducts: _totalProducts,
-        hasNextPage: false,
-        hasPreviousPage: false,
-      ));
+    filteredProducts = _sortProducts(filteredProducts, _currentSortType);
+
+    emit(ProductsSuccess(
+      products: filteredProducts,
+      currentPage: 0,
+      totalProducts: filteredProducts.length,
+      hasNextPage: false,
+      hasPreviousPage: false,
+    ));
+  }
+
+  List<DetailsPage> _sortProducts(
+      List<DetailsPage> products, SortType sortType) {
+    final sortedProducts = List<DetailsPage>.from(products);
+
+    switch (sortType) {
+      case SortType.alphabeticalAsc:
+        sortedProducts.sort((a, b) => a.title.compareTo(b.title));
+        break;
+      case SortType.alphabeticalDesc:
+        sortedProducts.sort((a, b) => b.title.compareTo(a.title));
+        break;
+      case SortType.priceAsc:
+        sortedProducts.sort((a, b) => a.price.compareTo(b.price));
+        break;
+      case SortType.priceDesc:
+        sortedProducts.sort((a, b) => b.price.compareTo(a.price));
+        break;
+      case SortType.ratingDesc:
+        sortedProducts.sort((a, b) => b.rating.compareTo(a.rating));
+        break;
+      case SortType.ratingAsc:
+        sortedProducts.sort((a, b) => a.rating.compareTo(b.rating));
+        break;
+      case SortType.none:
+        break;
+    }
+    return sortedProducts;
+  }
+
+  Future<void> clearFilters() async {
+    _currentFilters = FilterOptions();
+    _currentSortType = SortType.none;
+    await getProducts(page: 0);
+  }
+
+  List<String> getAvailableCategories() {
+    final categories = _allAvailableProducts
+        .map((product) => product.category ?? 'Uncategorized')
+        .where((category) => category.isNotEmpty)
+        .toSet()
+        .toList();
+
+    categories.sort();
+    return categories;
+  }
+
+  List<String> getAvailableBrands() {
+    final brands = _allAvailableProducts
+        .map((product) => product.brand ?? 'Unknown')
+        .where((brand) => brand.isNotEmpty && brand != 'Unknown')
+        .toSet()
+        .toList();
+
+    brands.sort();
+    return brands;
+  }
+
+  bool get hasActiveFilters {
+    return !_currentFilters.isEmpty || _currentSortType != SortType.none;
+  }
+
+  Future<void> refreshProducts() async {
+    try {
+      if (state is ProductsSuccess) {
+        final currentState = state as ProductsSuccess;
+
+        if (hasActiveFilters) {
+          await _applyFiltersAndSort();
+        } else {
+          await getProducts(page: currentState.currentPage);
+        }
+      } else {
+        await getProducts(page: 0);
+      }
+    } catch (e) {
+      emit(ProductsServerError(
+          error: e.toString(), typeError: ExcResponse.unknown));
     }
   }
 }

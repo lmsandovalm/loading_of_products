@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:prueba_tecnica_flutter/core/styles/app_colors.dart';
 import 'package:prueba_tecnica_flutter/pages/details/models/details_page.dart';
 
 class ProductImageArea extends StatefulWidget {
@@ -44,12 +45,14 @@ class _ProductImageAreaState extends State<ProductImageArea> {
   @override
   Widget build(BuildContext context) {
     final images = _images;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return SizedBox(
       height: widget.height,
       width: double.infinity,
       child: Container(
-        color: Colors.white,
+        color: isDark ? AppColors.darkgray : AppColors.white,
         child: SafeArea(
           bottom: false,
           child: Padding(
@@ -66,6 +69,7 @@ class _ProductImageAreaState extends State<ProductImageArea> {
   }
 
   Widget _buildCarousel(List<String> images) {
+    final theme = Theme.of(context);
     return Stack(
       children: [
         PageView.builder(
@@ -90,10 +94,13 @@ class _ProductImageAreaState extends State<ProductImageArea> {
                 width: active ? 12 : 8,
                 height: 8,
                 decoration: BoxDecoration(
-                  color: active ? Colors.white : Colors.white70,
+                  color: active
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.secondary,
                   borderRadius: BorderRadius.circular(8),
                   boxShadow: [
-                    BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 4)
+                    BoxShadow(
+                        color: Colors.black.withOpacity(0.15), blurRadius: 4)
                   ],
                 ),
               );

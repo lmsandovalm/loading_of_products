@@ -8,6 +8,7 @@ import 'package:prueba_tecnica_flutter/widgets/page_general.dart';
 class ProductDetailPage extends StatelessWidget {
   final DetailsPage item;
   final double imageHeight;
+
   const ProductDetailPage({
     super.key,
     required this.item,
@@ -19,22 +20,22 @@ class ProductDetailPage extends StatelessWidget {
     return PageGeneral(
       isViewLogo: true,
       isViewBack: true,
-      body: Stack(
+      body: Column(
         children: [
           ProductImageArea(item: item, height: imageHeight),
-          Positioned.fill(
-              child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: Column(
-                    children: [
-                      ProductImageArea(item: item, height: imageHeight),
-                      const SizedBox(height: AppSpaces.m25),
-                      ProductDetailsCard(item: item),
-                      const SizedBox(height: AppSpaces.m15),
-                    ],
-                  )))
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Column(
+                children: [
+                  const SizedBox(height: AppSpaces.m25),
+                  ProductDetailsCard(item: item),
+                  const SizedBox(height: AppSpaces.m15),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -53,16 +54,17 @@ class ProductDetailsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
-      // estilo de tarjeta
       width: double.infinity,
       padding: padding,
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-              color: AppColors.black.withOpacity(0.06),
+              color: theme.shadowColor.withOpacity(0.1),
               blurRadius: 20,
               offset: const Offset(0, 8))
         ],
@@ -85,31 +87,24 @@ class ProductDetailsCard extends StatelessWidget {
               const SizedBox(width: AppSpaces.m15),
               Text(
                 '\$${item.price.toStringAsFixed(2)}',
-                style: const TextStyle(
+                style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.darkgray),
+                    color: theme.colorScheme.onSurface),
               ),
             ],
           ),
-
           const SizedBox(height: AppSpaces.m15),
-
-          // categoria
           Text('Category: ${item.category}',
               style: const TextStyle(
                   color: AppColors.skyblue, fontWeight: FontWeight.w600)),
-
           const SizedBox(height: AppSpaces.m15),
-
-          // descripcion
           Text(item.description,
-              style: const TextStyle(
-                  fontSize: 16, height: 1.5, color: AppColors.darkgray)),
-
+              style: TextStyle(
+                  fontSize: 16,
+                  height: 1.5,
+                  color: theme.colorScheme.onSurface)),
           const SizedBox(height: 16),
-
-          // rating/stock/brand
           Row(
             children: [
               const Icon(Icons.star, size: 18, color: Colors.amber),
@@ -126,7 +121,6 @@ class ProductDetailsCard extends StatelessWidget {
               Text(item.brand ?? 'Unknown'),
             ],
           ),
-
           const SizedBox(height: AppSpaces.m45),
         ],
       ),

@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:prueba_tecnica_flutter/core/styles/app_colors.dart';
 import 'package:prueba_tecnica_flutter/core/styles/app_spaces.dart';
+import 'package:prueba_tecnica_flutter/core/utils/filter_dialog.dart';
 import 'package:prueba_tecnica_flutter/core/utils/navigation_util.dart';
 import 'package:prueba_tecnica_flutter/datasource/products_datasouce.dart';
 import 'package:prueba_tecnica_flutter/logic/products_logic.dart';
 import 'package:prueba_tecnica_flutter/pages/details/models/details_page.dart';
 import 'package:prueba_tecnica_flutter/pages/details/product_detail_page.dart';
 import 'package:prueba_tecnica_flutter/widgets/page_general.dart';
+import 'package:prueba_tecnica_flutter/widgets/shimmer_effect.dart';
 
 class ProductsGeneralPage extends StatelessWidget {
   const ProductsGeneralPage({super.key});
@@ -18,84 +20,142 @@ class ProductsGeneralPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => ProductsCubit(ProductsDataSource())..getProducts(),
-      child: Scaffold(
-        body: PageGeneral(
-          isViewLogo: true,
-          isViewBack: false,
-          body: Column(
-            children: [
-              const SizedBox(height: AppSpaces.m25),
-              const SearchWidget(),
-              const SizedBox(height: AppSpaces.m25),
-              Expanded(
-                child: _buildProductsList(),
-              ),
-              const SizedBox(height: AppSpaces.m15),
-              const PaginationControls(), // Botones de paginación
-              const SizedBox(height: AppSpaces.m15),
-            ],
-          ),
+      child: const PageGeneral(
+        isViewLogo: true,
+        isViewBack: false,
+        isViewThemeToggle: true,
+        body: Column(
+          children: [
+            SizedBox(height: AppSpaces.m25),
+            SearchWidget(),
+            SizedBox(height: AppSpaces.m25),
+            Expanded(child: BodyHome()),
+            SizedBox(height: AppSpaces.m15),
+            PaginationControls(),
+            SizedBox(height: AppSpaces.m15),
+          ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildProductsList() {
-    return BlocBuilder<ProductsCubit, ProductsState>(
+class BodyHome extends StatelessWidget {
+  const BodyHome({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<ProductsCubit, ProductsState>(
+      listener: (context, state) {},
       builder: (context, state) {
-        if (state is ProductsLoading) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+        Future<void> handleRefresh() async {
+          final cubit = context.read<ProductsCubit>();
+
+          if (state is ProductsSuccess) {
+            await cubit.getProducts(page: state.currentPage);
+          } else {
+            await cubit.getProducts(page: 0);
+          }
         }
 
-        if (state is ProductsServerError) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline,
-                    color: AppColors.skyblue, size: 50),
-                const SizedBox(height: AppSpaces.m10),
-                Text(
-                  'Error: ${state.error}',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: AppColors.lila),
+        Widget buildContent() {
+          if (state is ProductsLoading) {
+            return ListView.builder(
+              itemCount: 6,
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.only(bottom: AppSpaces.m25),
+              itemBuilder: (context, index) {
+                return const ProductItemShimmer();
+              },
+            );
+          }
+          if (state is ProductsServerError) {
+            return SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(40.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error_outline,
+                          color: AppColors.skyblue, size: 50),
+                      const SizedBox(height: AppSpaces.m10),
+                      Text(
+                        'Error: ${state.error}',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: AppColors.lila),
+                      ),
+                      const SizedBox(height: AppSpaces.m25),
+                      ElevatedButton(
+                        onPressed: () =>
+                            context.read<ProductsCubit>().getProducts(),
+                        child: const Text('Reintentar'),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: AppSpaces.m25),
-                ElevatedButton(
-                  onPressed: () => context.read<ProductsCubit>().getProducts(),
-                  child: const Text('Reintentar'),
-                ),
-              ],
-            ),
-          );
-        }
-
-        if (state is ProductsSuccess) {
-          final products = state.products;
-
-          if (products.isEmpty) {
-            return const Center(
-              child: Text(
-                'No hay productos disponibles',
-                style: TextStyle(color: AppColors.darkgray),
               ),
             );
           }
-
+          if (state is ProductsSuccess) {
+            final products = state.products;
+            if (products.isEmpty) {
+              return SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(40.0),
+                    child: Column(
+                      children: [
+                        const Icon(Icons.search_off,
+                            size: 50, color: Colors.grey),
+                        const SizedBox(height: AppSpaces.m10),
+                        const Text(
+                          'No se encontraron productos',
+                          style: TextStyle(
+                              color: AppColors.darkgray, fontSize: 16),
+                        ),
+                        const SizedBox(height: AppSpaces.m10),
+                        ElevatedButton(
+                          onPressed: () =>
+                              context.read<ProductsCubit>().getProducts(),
+                          child: const Text('Volver a cargar'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }
+            return ListView.builder(
+              itemCount: products.length,
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.only(bottom: AppSpaces.m25),
+              itemBuilder: (context, index) {
+                return TotalProducts(currentNew: products[index]);
+              },
+            );
+          }
           return ListView.builder(
-            itemCount: products.length,
-            physics: const BouncingScrollPhysics(),
+            itemCount: 6,
+            physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.only(bottom: AppSpaces.m25),
             itemBuilder: (context, index) {
-              return TotalProducts(currentNew: products[index]);
+              return const ProductItemShimmer();
             },
           );
         }
 
-        return const Center(
-          child: Text('Cargando productos...'),
+        return RefreshIndicator(
+          onRefresh: handleRefresh,
+          color: AppColors.lila,
+          backgroundColor: AppColors.white,
+          strokeWidth: 2.0,
+          displacement: 40.0,
+          child: buildContent(),
         );
       },
     );
@@ -109,6 +169,10 @@ class PaginationControls extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ProductsCubit, ProductsState>(
       builder: (context, state) {
+        if (state is ProductsLoading) {
+          return const SizedBox.shrink();
+        }
+
         if (state is! ProductsSuccess) {
           return const SizedBox.shrink();
         }
@@ -173,6 +237,22 @@ class SearchWidget extends StatefulWidget {
 class _SearchWidgetState extends State<SearchWidget> {
   final TextEditingController _searchController = TextEditingController();
   final _debouncer = _Debouncer(milliseconds: 500);
+  bool _isSearching = false;
+
+  void _showFilterDialog() {
+    final cubit = context.read<ProductsCubit>();
+    final categories = cubit.getAvailableCategories();
+    final brands = cubit.getAvailableBrands();
+
+    showDialog(
+      context: context,
+      builder: (context) => FilterDialog(
+        cubit: cubit,
+        categories: categories,
+        brands: brands,
+      ),
+    );
+  }
 
   @override
   void dispose() {
@@ -181,42 +261,114 @@ class _SearchWidgetState extends State<SearchWidget> {
     super.dispose();
   }
 
+  void _performSearch(String value) async {
+    if (value.isEmpty) {
+      setState(() {
+        _isSearching = false;
+      });
+      context.read<ProductsCubit>().getProducts(page: 0);
+      return;
+    }
+
+    setState(() {
+      _isSearching = true;
+    });
+
+    try {
+      await context.read<ProductsCubit>().searchAllProductsByTitle(value);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSearching = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpaces.m25),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(30),
-          color: AppColors.greyLight,
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _searchController,
-                onChanged: (value) {
-                  _debouncer.run(() {
-                    context.read<ProductsCubit>().filterProductsByTitle(value);
-                  });
-                },
-                textAlign: TextAlign.center,
-                decoration: const InputDecoration(
-                  hintText: '¿Qué buscas?',
-                  hintStyle: TextStyle(
-                    color: AppColors.darkgray,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
+    return BlocBuilder<ProductsCubit, ProductsState>(
+      builder: (context, state) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpaces.m25),
+          child: Row(
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(30),
+                    color: AppColors.greyLight,
                   ),
-                  border: InputBorder.none,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _searchController,
+                          onChanged: (value) {
+                            _debouncer.run(() {
+                              _performSearch(value);
+                            });
+                          },
+                          textAlign: TextAlign.center,
+                          decoration: InputDecoration(
+                            hintText: '¿Qué buscas?',
+                            hintStyle: const TextStyle(
+                              color: AppColors.darkgray,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                            ),
+                            border: InputBorder.none,
+                            suffixIcon: _isSearching
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          AppColors.darkgray),
+                                    ),
+                                  )
+                                : null,
+                          ),
+                        ),
+                      ),
+                      const Icon(Icons.search, color: AppColors.darkgray),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            const Icon(Icons.search, color: AppColors.darkgray),
-          ],
-        ),
-      ),
+
+              const SizedBox(width: AppSpaces.m10),
+
+              // Botón de filtro con indicador cuando hay filtros activos
+              BlocBuilder<ProductsCubit, ProductsState>(
+                builder: (context, state) {
+                  final hasActiveFilters = state is ProductsSuccess &&
+                      (context.read<ProductsCubit>().hasActiveFilters);
+
+                  return Badge(
+                    isLabelVisible: hasActiveFilters,
+                    backgroundColor: AppColors.lila,
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.lila,
+                      ),
+                      child: IconButton(
+                        onPressed: _showFilterDialog,
+                        icon:
+                            const Icon(Icons.filter_list, color: Colors.white),
+                        tooltip: 'Filtrar y ordenar productos',
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -229,6 +381,7 @@ class TotalProducts extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final item = currentNew;
+    final theme = Theme.of(context);
 
     return GestureDetector(
       onTap: () {
@@ -255,7 +408,6 @@ class TotalProducts extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Imagen
             Expanded(
               flex: 4,
               child: ClipRRect(
@@ -289,7 +441,6 @@ class TotalProducts extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpaces.m15),
-            // Detalles
             Expanded(
               flex: 6,
               child: Padding(
@@ -300,33 +451,29 @@ class TotalProducts extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Título
                     Text(
                       item.title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: AppColors.darkgray,
+                      style: TextStyle(
+                        color: theme.colorScheme.onSurface,
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
                       ),
                     ),
                     const SizedBox(height: AppSpaces.m10),
-                    // Marca y Categoría
                     Text(
                       '${item.brand ?? 'Unknown'} • ${item.category ?? 'Uncategorized'}',
-                      style: const TextStyle(
-                        color: AppColors.darkgray,
+                      style: TextStyle(
+                        color: theme.colorScheme.onSurface,
                         fontSize: 12,
                       ),
                     ),
                     const SizedBox(height: AppSpaces.m5),
-
-                    // Precio
                     Text(
                       '\$${item.price.toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        color: AppColors.darkgray,
+                      style: TextStyle(
+                        color: theme.colorScheme.onSurface,
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                       ),
@@ -340,8 +487,8 @@ class TotalProducts extends StatelessWidget {
                         const SizedBox(width: 4),
                         Text(
                           item.rating.toStringAsFixed(1),
-                          style: const TextStyle(
-                            color: AppColors.darkgray,
+                          style: TextStyle(
+                            color: theme.colorScheme.onSurface,
                             fontSize: 12,
                           ),
                         ),
@@ -351,21 +498,20 @@ class TotalProducts extends StatelessWidget {
                         const SizedBox(width: 4),
                         Text(
                           '${item.stock} units',
-                          style: const TextStyle(
-                            color: AppColors.darkgray,
+                          style: TextStyle(
+                            color: theme.colorScheme.onSurface,
                             fontSize: 12,
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: AppSpaces.m10),
-
-                    const Align(
+                    Align(
                       alignment: Alignment.bottomLeft,
                       child: Text(
                         'Ver más',
                         style: TextStyle(
-                          color: AppColors.darkgray,
+                          color: theme.colorScheme.onSurface,
                           fontWeight: FontWeight.bold,
                           fontSize: 13,
                         ),
