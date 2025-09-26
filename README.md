@@ -94,14 +94,14 @@ flutter pub get
 flutter pub run build_runner build --delete-conflicting-outputs
 
 # Ejecutar la aplicación
-flutter run
+flutter run 
+```
 
 ## 🌟 Comandos de desarrollo útiles
 
-```bash
 # Generar código en modo watch (desarrollo)
 flutter pub run build_runner watch --delete-conflicting-outputs
-
+```bash
 # Ejecutar tests unitarios
 flutter test
 
@@ -110,9 +110,10 @@ flutter analyze
 
 # Ver dependencias desactualizadas
 flutter pub outdated
-
+```
 
 ## 🏗️ Estructura del Proyecto
+```bash
 lib/
 ├── core/                 # Utilidades y estilos base
 │   ├── styles/          # Colores, espacios, temas
@@ -129,6 +130,7 @@ lib/
     ├── shimmer_effect.dart
     ├── theme.dart
     └── page_general.dart
+```
 
 ## 👨‍💻 Arquitectura y Patrones
 
