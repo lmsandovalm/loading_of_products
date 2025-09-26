@@ -98,10 +98,10 @@ flutter run
 ```
 
 ## 🌟 Comandos de desarrollo útiles
-
+```bash
 # Generar código en modo watch (desarrollo)
 flutter pub run build_runner watch --delete-conflicting-outputs
-```bash
+
 # Ejecutar tests unitarios
 flutter test
 
