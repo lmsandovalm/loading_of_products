@@ -1,415 +1,143 @@
-# prueba_tecnica_flutter
+📱 Prueba Técnica Flutter - Visualización de Productos
 
-A new Flutter project.
+Una aplicación Flutter moderna que consume la API de DummyJSON para mostrar productos con paginación infinita, búsqueda en tiempo real y modo claro/oscuro.
 
-## Getting Started
+📸 Capturas de Pantalla
+<div align="center">
+🌞 Modo Claro	🌙 Modo Oscuro	📱 Detalle
+<img src="assets/images/screenshots/modo_claro.png" width="200">	<img src="assets/images/screenshots/modo_oscuro.png" width="200">	<img src="assets/images/screenshots/detalle.png" width="200">
+Vista principal con tema claro	Vista principal con tema oscuro	Detalle completo del producto
+</div>
 
-This project is a starting point for a Flutter application.
+🚀 Características
+   ✅ Requerimientos Principales Implementados
+      ✅ Consumo de API DummyJSON con paginación automática
+      ✅ Lista de productos con imagen thumbnail, título, precio y categoría
+      ✅ Paginación (carga automática al final del scroll)
+      ✅ Pantalla de detalle con información completa y diseño dividido
+      ✅ Manejo de estados (carga, error, vacío) con indicadores visuales
+      ✅ Arquitectura limpia con separación de responsabilidades
 
-A few resources to get you started if this is your first Flutter project:
+🌟 Extras Implementados
+   🔍 Búsqueda en tiempo real con filtrado instantáneo
+   ⚡ Pull to refresh para recargar datos
+   📊 Filtros y ordenamiento por precio, nombre y categoría
+   🌙 Modo claro/oscuro con persistencia local automática
+   💫 Efecto Shimmer durante la carga de productos
+   🧪 Tests unitario para datasource
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+🛠️ Tecnologías y Dependencias
+   ✅Framework y Lenguaje
+      Flutter SDK: ^3.5.4
+      Dart: ^3.5.4
 
-```
-prueba_tecnica_flutter
-├─ .metadata
-├─ analysis_options.yaml
-├─ android
-│  ├─ .gradle
-│  │  ├─ 8.3
-│  │  │  ├─ checksums
-│  │  │  │  ├─ checksums.lock
-│  │  │  │  └─ sha1-checksums.bin
-│  │  │  ├─ dependencies-accessors
-│  │  │  │  ├─ dependencies-accessors.lock
-│  │  │  │  └─ gc.properties
-│  │  │  ├─ executionHistory
-│  │  │  │  ├─ executionHistory.bin
-│  │  │  │  └─ executionHistory.lock
-│  │  │  ├─ fileChanges
-│  │  │  │  └─ last-build.bin
-│  │  │  ├─ fileHashes
-│  │  │  │  ├─ fileHashes.bin
-│  │  │  │  ├─ fileHashes.lock
-│  │  │  │  └─ resourceHashesCache.bin
-│  │  │  ├─ gc.properties
-│  │  │  └─ vcsMetadata
-│  │  ├─ buildOutputCleanup
-│  │  │  ├─ buildOutputCleanup.lock
-│  │  │  ├─ cache.properties
-│  │  │  └─ outputFiles.bin
-│  │  ├─ file-system.probe
-│  │  ├─ kotlin
-│  │  │  ├─ errors
-│  │  │  └─ sessions
-│  │  └─ vcs-1
-│  │     └─ gc.properties
-│  ├─ app
-│  │  ├─ build.gradle
-│  │  └─ src
-│  │     ├─ debug
-│  │     │  └─ AndroidManifest.xml
-│  │     ├─ main
-│  │     │  ├─ AndroidManifest.xml
-│  │     │  ├─ java
-│  │     │  │  └─ io
-│  │     │  │     └─ flutter
-│  │     │  │        └─ plugins
-│  │     │  │           └─ GeneratedPluginRegistrant.java
-│  │     │  ├─ kotlin
-│  │     │  │  └─ com
-│  │     │  │     └─ example
-│  │     │  │        └─ prueba_tecnica_flutter
-│  │     │  │           └─ MainActivity.kt
-│  │     │  └─ res
-│  │     │     ├─ drawable
-│  │     │     │  └─ launch_background.xml
-│  │     │     ├─ drawable-v21
-│  │     │     │  └─ launch_background.xml
-│  │     │     ├─ mipmap-hdpi
-│  │     │     │  └─ ic_launcher.png
-│  │     │     ├─ mipmap-mdpi
-│  │     │     │  └─ ic_launcher.png
-│  │     │     ├─ mipmap-xhdpi
-│  │     │     │  └─ ic_launcher.png
-│  │     │     ├─ mipmap-xxhdpi
-│  │     │     │  └─ ic_launcher.png
-│  │     │     ├─ mipmap-xxxhdpi
-│  │     │     │  └─ ic_launcher.png
-│  │     │     ├─ values
-│  │     │     │  └─ styles.xml
-│  │     │     └─ values-night
-│  │     │        └─ styles.xml
-│  │     └─ profile
-│  │        └─ AndroidManifest.xml
-│  ├─ build.gradle
-│  ├─ gradle
-│  │  └─ wrapper
-│  │     ├─ gradle-wrapper.jar
-│  │     └─ gradle-wrapper.properties
-│  ├─ gradle.properties
-│  ├─ gradlew
-│  ├─ gradlew.bat
-│  ├─ local.properties
-│  └─ settings.gradle
-├─ assets
-│  ├─ fonts
-│  └─ images
-│     ├─ LogoL.png
-│     └─ LogoLS.png
-├─ ios
-│  ├─ Flutter
-│  │  ├─ AppFrameworkInfo.plist
-│  │  ├─ Debug.xcconfig
-│  │  ├─ flutter_export_environment.sh
-│  │  ├─ Generated.xcconfig
-│  │  └─ Release.xcconfig
-│  ├─ Runner
-│  │  ├─ AppDelegate.swift
-│  │  ├─ Assets.xcassets
-│  │  │  ├─ AppIcon.appiconset
-│  │  │  │  ├─ Contents.json
-│  │  │  │  ├─ Icon-App-1024x1024@1x.png
-│  │  │  │  ├─ Icon-App-20x20@1x.png
-│  │  │  │  ├─ Icon-App-20x20@2x.png
-│  │  │  │  ├─ Icon-App-20x20@3x.png
-│  │  │  │  ├─ Icon-App-29x29@1x.png
-│  │  │  │  ├─ Icon-App-29x29@2x.png
-│  │  │  │  ├─ Icon-App-29x29@3x.png
-│  │  │  │  ├─ Icon-App-40x40@1x.png
-│  │  │  │  ├─ Icon-App-40x40@2x.png
-│  │  │  │  ├─ Icon-App-40x40@3x.png
-│  │  │  │  ├─ Icon-App-60x60@2x.png
-│  │  │  │  ├─ Icon-App-60x60@3x.png
-│  │  │  │  ├─ Icon-App-76x76@1x.png
-│  │  │  │  ├─ Icon-App-76x76@2x.png
-│  │  │  │  └─ Icon-App-83.5x83.5@2x.png
-│  │  │  └─ LaunchImage.imageset
-│  │  │     ├─ Contents.json
-│  │  │     ├─ LaunchImage.png
-│  │  │     ├─ LaunchImage@2x.png
-│  │  │     ├─ LaunchImage@3x.png
-│  │  │     └─ README.md
-│  │  ├─ Base.lproj
-│  │  │  ├─ LaunchScreen.storyboard
-│  │  │  └─ Main.storyboard
-│  │  ├─ GeneratedPluginRegistrant.h
-│  │  ├─ GeneratedPluginRegistrant.m
-│  │  ├─ Info.plist
-│  │  └─ Runner-Bridging-Header.h
-│  ├─ Runner.xcodeproj
-│  │  ├─ project.pbxproj
-│  │  ├─ project.xcworkspace
-│  │  │  ├─ contents.xcworkspacedata
-│  │  │  └─ xcshareddata
-│  │  │     ├─ IDEWorkspaceChecks.plist
-│  │  │     └─ WorkspaceSettings.xcsettings
-│  │  └─ xcshareddata
-│  │     └─ xcschemes
-│  │        └─ Runner.xcscheme
-│  ├─ Runner.xcworkspace
-│  │  ├─ contents.xcworkspacedata
-│  │  └─ xcshareddata
-│  │     ├─ IDEWorkspaceChecks.plist
-│  │     └─ WorkspaceSettings.xcsettings
-│  └─ RunnerTests
-│     └─ RunnerTests.swift
-├─ lib
-│  ├─ core
-│  │  ├─ styles
-│  │  │  ├─ app_colors.dart
-│  │  │  └─ app_spaces.dart
-│  │  └─ utils
-│  │     └─ navigation_util.dart
-│  ├─ logic
-│  ├─ main.dart
-│  ├─ models
-│  │  └─ serialization
-│  │     ├─ serializers.dart
-│  │     └─ serializers.g.dart
-│  ├─ pages
-│  │  ├─ details
-│  │  │  ├─ datasource
-│  │  │  └─ models
-│  │  └─ home
-│  │     ├─ datasource
-│  │     └─ models
-│  │        ├─ home_page.dart
-│  │        └─ home_page.g.dart
-│  └─ widgets
-│     └─ page_general.dart
-├─ pubspec.lock
-├─ pubspec.yaml
-├─ README.md
-├─ test
-│  └─ widget_test.dart
-└─ web
-   ├─ favicon.png
-   ├─ icons
-   │  ├─ Icon-192.png
-   │  ├─ Icon-512.png
-   │  ├─ Icon-maskable-192.png
-   │  └─ Icon-maskable-512.png
-   ├─ index.html
-   └─ manifest.json
+   ✅Manejo de Estado y Arquitectura
+      bloc: ^9.0.0 - Gestión de estado predictivo
+      flutter_bloc: ^9.1.0 - Integración de BLoC con Flutter
+      equatable: ^2.0.7 - Comparación de objetos simplificada
+      provider: ^6.1.4 - Inyección de dependencias
 
-```
-```
-prueba_tecnica_flutter
-├─ .metadata
-├─ analysis_options.yaml
-├─ android
-│  ├─ .gradle
-│  │  ├─ 8.3
-│  │  │  ├─ checksums
-│  │  │  │  ├─ checksums.lock
-│  │  │  │  └─ sha1-checksums.bin
-│  │  │  ├─ dependencies-accessors
-│  │  │  │  ├─ dependencies-accessors.lock
-│  │  │  │  └─ gc.properties
-│  │  │  ├─ executionHistory
-│  │  │  │  ├─ executionHistory.bin
-│  │  │  │  └─ executionHistory.lock
-│  │  │  ├─ fileChanges
-│  │  │  │  └─ last-build.bin
-│  │  │  ├─ fileHashes
-│  │  │  │  ├─ fileHashes.bin
-│  │  │  │  ├─ fileHashes.lock
-│  │  │  │  └─ resourceHashesCache.bin
-│  │  │  ├─ gc.properties
-│  │  │  └─ vcsMetadata
-│  │  ├─ buildOutputCleanup
-│  │  │  ├─ buildOutputCleanup.lock
-│  │  │  ├─ cache.properties
-│  │  │  └─ outputFiles.bin
-│  │  ├─ file-system.probe
-│  │  ├─ kotlin
-│  │  │  ├─ errors
-│  │  │  └─ sessions
-│  │  └─ vcs-1
-│  │     └─ gc.properties
-│  ├─ app
-│  │  ├─ build.gradle
-│  │  └─ src
-│  │     ├─ debug
-│  │     │  └─ AndroidManifest.xml
-│  │     ├─ main
-│  │     │  ├─ AndroidManifest.xml
-│  │     │  ├─ java
-│  │     │  │  └─ io
-│  │     │  │     └─ flutter
-│  │     │  │        └─ plugins
-│  │     │  │           └─ GeneratedPluginRegistrant.java
-│  │     │  ├─ kotlin
-│  │     │  │  └─ com
-│  │     │  │     └─ example
-│  │     │  │        └─ prueba_tecnica_flutter
-│  │     │  │           └─ MainActivity.kt
-│  │     │  └─ res
-│  │     │     ├─ drawable
-│  │     │     │  └─ launch_background.xml
-│  │     │     ├─ drawable-v21
-│  │     │     │  └─ launch_background.xml
-│  │     │     ├─ mipmap-hdpi
-│  │     │     │  └─ ic_launcher.png
-│  │     │     ├─ mipmap-mdpi
-│  │     │     │  └─ ic_launcher.png
-│  │     │     ├─ mipmap-xhdpi
-│  │     │     │  └─ ic_launcher.png
-│  │     │     ├─ mipmap-xxhdpi
-│  │     │     │  └─ ic_launcher.png
-│  │     │     ├─ mipmap-xxxhdpi
-│  │     │     │  └─ ic_launcher.png
-│  │     │     ├─ values
-│  │     │     │  └─ styles.xml
-│  │     │     └─ values-night
-│  │     │        └─ styles.xml
-│  │     └─ profile
-│  │        └─ AndroidManifest.xml
-│  ├─ build.gradle
-│  ├─ gradle
-│  │  └─ wrapper
-│  │     ├─ gradle-wrapper.jar
-│  │     └─ gradle-wrapper.properties
-│  ├─ gradle.properties
-│  ├─ gradlew
-│  ├─ gradlew.bat
-│  ├─ local.properties
-│  └─ settings.gradle
-├─ assets
-│  ├─ fonts
-│  │  └─ Montserrat
-│  │     ├─ Montserrat-Bold.ttf
-│  │     ├─ Montserrat-Medium.ttf
-│  │     ├─ Montserrat-Regular.ttf
-│  │     └─ Montserrat-SemiBold.ttf
-│  └─ images
-│     └─ LogoLS.png
-├─ ios
-│  ├─ Flutter
-│  │  ├─ AppFrameworkInfo.plist
-│  │  ├─ Debug.xcconfig
-│  │  ├─ flutter_export_environment.sh
-│  │  ├─ Generated.xcconfig
-│  │  └─ Release.xcconfig
-│  ├─ Runner
-│  │  ├─ AppDelegate.swift
-│  │  ├─ Assets.xcassets
-│  │  │  ├─ AppIcon.appiconset
-│  │  │  │  ├─ Contents.json
-│  │  │  │  ├─ Icon-App-1024x1024@1x.png
-│  │  │  │  ├─ Icon-App-20x20@1x.png
-│  │  │  │  ├─ Icon-App-20x20@2x.png
-│  │  │  │  ├─ Icon-App-20x20@3x.png
-│  │  │  │  ├─ Icon-App-29x29@1x.png
-│  │  │  │  ├─ Icon-App-29x29@2x.png
-│  │  │  │  ├─ Icon-App-29x29@3x.png
-│  │  │  │  ├─ Icon-App-40x40@1x.png
-│  │  │  │  ├─ Icon-App-40x40@2x.png
-│  │  │  │  ├─ Icon-App-40x40@3x.png
-│  │  │  │  ├─ Icon-App-60x60@2x.png
-│  │  │  │  ├─ Icon-App-60x60@3x.png
-│  │  │  │  ├─ Icon-App-76x76@1x.png
-│  │  │  │  ├─ Icon-App-76x76@2x.png
-│  │  │  │  └─ Icon-App-83.5x83.5@2x.png
-│  │  │  └─ LaunchImage.imageset
-│  │  │     ├─ Contents.json
-│  │  │     ├─ LaunchImage.png
-│  │  │     ├─ LaunchImage@2x.png
-│  │  │     ├─ LaunchImage@3x.png
-│  │  │     └─ README.md
-│  │  ├─ Base.lproj
-│  │  │  ├─ LaunchScreen.storyboard
-│  │  │  └─ Main.storyboard
-│  │  ├─ GeneratedPluginRegistrant.h
-│  │  ├─ GeneratedPluginRegistrant.m
-│  │  ├─ Info.plist
-│  │  └─ Runner-Bridging-Header.h
-│  ├─ Runner.xcodeproj
-│  │  ├─ project.pbxproj
-│  │  ├─ project.xcworkspace
-│  │  │  ├─ contents.xcworkspacedata
-│  │  │  └─ xcshareddata
-│  │  │     ├─ IDEWorkspaceChecks.plist
-│  │  │     └─ WorkspaceSettings.xcsettings
-│  │  └─ xcshareddata
-│  │     └─ xcschemes
-│  │        └─ Runner.xcscheme
-│  ├─ Runner.xcworkspace
-│  │  ├─ contents.xcworkspacedata
-│  │  └─ xcshareddata
-│  │     ├─ IDEWorkspaceChecks.plist
-│  │     └─ WorkspaceSettings.xcsettings
-│  └─ RunnerTests
-│     └─ RunnerTests.swift
-├─ lib
-│  ├─ core
-│  │  ├─ styles
-│  │  │  ├─ app_colors.dart
-│  │  │  └─ app_spaces.dart
-│  │  └─ utils
-│  │     ├─ filter_dialog.dart
-│  │     ├─ filter_products.dart
-│  │     ├─ internet_util.dart
-│  │     ├─ navigation_util.dart
-│  │     ├─ network_connection.dart
-│  │     ├─ sort_type.dart
-│  │     ├─ theme_mode.dart
-│  │     └─ theme_options.dart
-│  ├─ datasource
-│  │  └─ products_datasouce.dart
-│  ├─ logic
-│  │  ├─ products_logic.dart
-│  │  └─ theme_logic.dart
-│  ├─ main.dart
-│  ├─ models
-│  │  ├─ exception
-│  │  │  └─ general_exception.dart
-│  │  └─ serialization
-│  │     ├─ serializers.dart
-│  │     └─ serializers.g.dart
-│  ├─ pages
-│  │  ├─ details
-│  │  │  ├─ models
-│  │  │  │  ├─ details_page.dart
-│  │  │  │  └─ details_page.g.dart
-│  │  │  ├─ product_detail_page.dart
-│  │  │  └─ widgets
-│  │  │     └─ carrousel_images.dart
-│  │  └─ home
-│  │     ├─ models
-│  │     │  ├─ home_page.dart
-│  │     │  └─ home_page.g.dart
-│  │     └─ products_page_general.dart
-│  └─ widgets
-│     ├─ page_general.dart
-│     ├─ shimmer_card.dart
-│     ├─ shimmer_effect.dart
-│     └─ theme.dart
-├─ pubspec.lock
-├─ pubspec.yaml
-├─ README.md
-├─ test
-│  ├─ mock
-│  │  └─ mock_products.dart
-│  ├─ test_config.dart
-│  ├─ unit
-│  │  ├─ products_datasource_test.dart
-│  │  └─ products_datasource_test.mocks.dart
-│  └─ widget_test.dart
-└─ web
-   ├─ favicon.png
-   ├─ icons
-   │  ├─ Icon-192.png
-   │  ├─ Icon-512.png
-   │  ├─ Icon-maskable-192.png
-   │  └─ Icon-maskable-512.png
-   ├─ index.html
-   └─ manifest.json
+   ✅HTTP y API
+      http: ^1.5.0 - Cliente HTTP para consumo de APIs
+      built_value: ^8.9.5 - Serialización/deserialización JSON type-safe
+      built_collection: ^5.1.1 - Colecciones inmutables
 
-```
+   ✅Persistencia Local
+      shared_preferences: ^2.2.2 - Almacenamiento de preferencias de tema
+      hive: ^2.2.3 - Base de datos local rápida para cache
+      hive_flutter: ^1.1.0 - Integración de Hive con Flutter
+
+   ✅UI y Experiencia de Usuario
+      shimmer: ^3.0.0 - Efectos de carga con shimmer
+      flutter_markdown: ^0.7.0 - Renderizado de contenido Markdown
+      cupertino_icons: ^1.0.8 - Iconos de iOS
+
+   ✅Conectividad y Utilidades
+      connectivity_plus: ^6.1.4 - Detección de estado de conexión
+      internet_connection_checker_plus: ^2.7.1 - Verificación de conectividad a Internet
+
+   ✅Desarrollo y Calidad de Código
+      very_good_analysis: ^7.0.0 - Análisis estático y mejores prácticas
+      flutter_lints: ^4.0.0 - Reglas de linting para Flutter
+
+   ✅Herramientas de Desarrollo
+      flutter_launcher_icons: ^0.14.3 - Generación de iconos de la app
+      build_runner: ^2.4.12 - Generación de código para serialización
+
+📥 Instalación y Configuración
+   ✅Prerrequisitos
+      Flutter SDK 3.5.4 o superior
+      Dart 3.5.4 o superior
+      Dispositivo/Emulador Android/iOS
+
+   ✅Pasos de Instalación
+      🛠️Clonar el repositorio: 
+      git clone https://github.com/lmsandovalm/loading_of_products.git
+      cd loading_of_products
+
+      🛠️Instalar dependencias:
+      flutter pub get
+
+      🛠️Generar código de serialización:
+      flutter pub run build_runner build --delete-conflicting-outputs
+
+      🛠️Ejecutar la aplicación:
+      flutter run
+
+🌟 Comandos de desarrollo útiles 
+   # Generar código en modo watch (desarrollo)
+   flutter pub run build_runner watch --delete-conflicting-outputs
+   # Ejecutar tests unitarios
+   flutter test
+   # Analizar código según very_good_analysis
+   flutter analyze
+   # Ver dependencias desactualizadas
+   flutter pub outdated
+
+🏗️ Estructura del Proyecto
+lib/
+├── core/                 # Utilidades y estilos base
+│   ├── styles/          # Colores, espacios, temas
+│   └── utils/           # Utilidades (navegación, filtros, conexión)
+├── datasource/          # Capa de datos (API DummyJSON)
+├── logic/               # BLoCs y lógica de negocio
+├── models/              # Modelos de datos y serialización
+│   ├── exception/       # Manejo de excepciones
+│   └── serialization/   # Serialización con built_value
+├── pages/               # Pantallas de la aplicación
+│   ├── home/           # Pantalla principal con lista
+│   └── details/        # Pantalla de detalle con carrusel
+└── widgets/            # Componentes reutilizables
+    ├── shimmer_effect.dart
+    ├── theme.dart
+    └── page_general.dart
+
+👨‍💻 Arquitectura y Patrones
+   📊Patrones Implementados
+      BLoC Pattern - Separación clara entre lógica de negocio y UI
+      Repository Pattern - Abstracción de la fuente de datos
+      Dependency Injection - Con Provider para gestión de dependencias
+      Clean Architecture - Separación en capas (Data, Domain, Presentation)
+
+📄Características de la Arquitectura
+   ✅ Separación de responsabilidades (Presentación, Dominio, Datos)
+   ✅ Serialización type-safe con Built Value
+   ✅ Gestión de errores centralizada
+   ✅ Testing facilitado con mocking de dependencias
+
+📚 Uso de la Aplicación
+   🌐Navegación Principal
+      Pantalla Inicial: Lista de productos con paginación automática
+      Buscar productos: Usa la barra de búsqueda superior para filtrado en tiempo real
+      Filtrar/Ordenar: Icono de filtro en AppBar para ordenar por precio, nombre, etc.
+      Ver detalle: Toca cualquier producto para ver información completa
+      Cambiar tema: El modo claro/oscuro se persiste automáticamente
+
+🌐 API Utilizada
+   DummyJSON Products API
+      Base URL: https://dummyjson.com/products
+      Método: GET
+      Parámetros de Paginación: limit, skip
+      Ejemplo de Request: https://dummyjson.com/products?limit=10&skip=0
+
