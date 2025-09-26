@@ -14,35 +14,45 @@ class ProductsDataSource {
     final url =
         Uri.parse('https://dummyjson.com/products?limit=$limit&skip=$skip');
 
-    final response = await client.get(url).timeout(const Duration(seconds: 10),
+    try {
+      final response = await client.get(url).timeout(
+        const Duration(seconds: 10),
         onTimeout: () {
-      throw ResponseServerException(
-          'Timeout al obtener productos', ExcResponse.errorGeneral);
-    });
-
-    if (response.statusCode == 200) {
-      try {
-        final dataJson = json.decode(response.body) as Map<String, dynamic>;
-
-        final cleanedData = _cleanNullFields(dataJson);
-
-        final responseObject = Home.fromJson(cleanedData);
-
-        if (responseObject != null) {
-          return responseObject;
-        } else {
           throw ResponseServerException(
-              'Error al deserializar los productos', ExcResponse.errorGeneral);
+              'Timeout al obtener productos', ExcResponse.errorGeneral);
+        },
+      );
+
+      if (response.statusCode == 200) {
+        try {
+          final dataJson = json.decode(response.body) as Map<String, dynamic>;
+          final cleanedData = _cleanNullFields(dataJson);
+          final responseObject = Home.fromJson(cleanedData);
+
+          if (responseObject != null) {
+            return responseObject;
+          } else {
+            throw ResponseServerException('Error al deserializar los productos',
+                ExcResponse.errorGeneral);
+          }
+        } catch (e) {
+          print('Error al procesar respuesta: $e');
+          throw ResponseServerException(
+              'Error al procesar los productos: $e', ExcResponse.errorGeneral);
         }
-      } catch (e) {
-        print('Error al obtener productos: $e');
+      } else {
         throw ResponseServerException(
-            'Error al procesar los productos: $e', ExcResponse.errorGeneral);
+            'Falla en la solicitud de productos: ${response.statusCode}',
+            ExcResponse.errorGeneral);
       }
-    } else {
+    } on ResponseServerException {
+      rethrow;
+    } on Exception catch (e) {
       throw ResponseServerException(
-          'Falla en la solicitud de productos: ${response.statusCode}',
-          ExcResponse.errorGeneral);
+          'Error de conexión: $e', ExcResponse.errorGeneral);
+    } catch (e) {
+      throw ResponseServerException(
+          'Error inesperado: $e', ExcResponse.unknown);
     }
   }
 

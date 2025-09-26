@@ -67,6 +67,7 @@ class ProductsCubit extends Cubit<ProductsState> {
   FilterOptions _currentFilters = FilterOptions();
   SortType _currentSortType = SortType.none;
 
+  //Obtener productos con paginación
   Future<void> getProducts({int page = 0}) async {
     emit(const ProductsLoading());
     try {
@@ -83,7 +84,11 @@ class ProductsCubit extends Cubit<ProductsState> {
 
         if (homeResponse.data.isNotEmpty) {
           listProductsTotal = homeResponse.data.toList();
-          _allAvailableProducts.addAll(listProductsTotal);
+          for (var product in listProductsTotal) {
+            if (!_allAvailableProducts.any((p) => p.id == product.id)) {
+              _allAvailableProducts.add(product);
+            }
+          }
         }
 
         _allProducts = listProductsTotal;
@@ -186,6 +191,7 @@ class ProductsCubit extends Cubit<ProductsState> {
     ));
   }
 
+  //Funcion de busqueda en todos los productos por titulo
   Future<void> searchAllProductsByTitle(String searchText) async {
     if (searchText.isEmpty) {
       await getProducts(page: 0);
@@ -266,12 +272,16 @@ class ProductsCubit extends Cubit<ProductsState> {
   }
 
   Future<void> _applyFiltersAndSort() async {
+    if (!_allProductsLoaded) {
+      await _loadAllProductsForFilters();
+    }
+
     if (_allAvailableProducts.isEmpty) {
       await getProducts(page: 0);
       return;
     }
 
-    List<DetailsPage> filteredProducts = _allAvailableProducts;
+    List<DetailsPage> filteredProducts = List.from(_allAvailableProducts); 
 
     if (!_currentFilters.isEmpty) {
       filteredProducts = filteredProducts.where((product) {
@@ -279,14 +289,10 @@ class ProductsCubit extends Cubit<ProductsState> {
         final productBrand = product.brand ?? '';
 
         bool categoryMatch = _currentFilters.category.isEmpty ||
-            productCategory
-                .toLowerCase()
-                .contains(_currentFilters.category.toLowerCase());
+            productCategory.toLowerCase().contains(_currentFilters.category.toLowerCase());
 
         bool brandMatch = _currentFilters.brand.isEmpty ||
-            productBrand
-                .toLowerCase()
-                .contains(_currentFilters.brand.toLowerCase());
+            productBrand.toLowerCase().contains(_currentFilters.brand.toLowerCase());
 
         if (_currentFilters.filterType == FilterType.and) {
           return categoryMatch && brandMatch;
@@ -298,13 +304,45 @@ class ProductsCubit extends Cubit<ProductsState> {
 
     filteredProducts = _sortProducts(filteredProducts, _currentSortType);
 
+    final uniqueProducts = _removeDuplicates(filteredProducts);
+
     emit(ProductsSuccess(
-      products: filteredProducts,
+      products: uniqueProducts,
       currentPage: 0,
-      totalProducts: filteredProducts.length,
+      totalProducts: uniqueProducts.length,
       hasNextPage: false,
       hasPreviousPage: false,
     ));
+  }
+
+  List<DetailsPage> _removeDuplicates(List<DetailsPage> products) {
+    final seenIds = <int>{};
+    return products.where((product) => seenIds.add(product.id)).toList();
+  }
+
+  Future<void> _loadAllProductsForFilters() async {
+    if (_allProductsLoaded && _allAvailableProducts.length >= _totalProducts) {
+      return;
+    }
+
+    emit(const ProductsLoading());
+    try {
+      final Home homeResponse = await _productsdatasource.getProducts(
+        limit: _totalProducts, 
+        skip: 0,
+      );
+      
+      if (homeResponse.data.isNotEmpty) {
+        _allAvailableProducts = homeResponse.data.toList();
+        _allProductsLoaded = true;
+        
+      }
+    } catch (e) {
+      if (_allAvailableProducts.isEmpty) {
+        emit(ProductsServerError(
+            error: e.toString(), typeError: ExcResponse.unknown));
+      }
+    }
   }
 
   List<DetailsPage> _sortProducts(
@@ -367,6 +405,7 @@ class ProductsCubit extends Cubit<ProductsState> {
   bool get hasActiveFilters {
     return !_currentFilters.isEmpty || _currentSortType != SortType.none;
   }
+
 
   Future<void> refreshProducts() async {
     try {

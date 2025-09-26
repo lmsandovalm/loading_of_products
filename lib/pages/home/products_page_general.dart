@@ -47,6 +47,8 @@ class BodyHome extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return BlocConsumer<ProductsCubit, ProductsState>(
       listener: (context, state) {},
       builder: (context, state) {
@@ -92,7 +94,14 @@ class BodyHome extends StatelessWidget {
                       ElevatedButton(
                         onPressed: () =>
                             context.read<ProductsCubit>().getProducts(),
-                        child: const Text('Reintentar'),
+                        child: Text(
+                          'Reintentar',
+                          style: TextStyle(
+                            color: theme.colorScheme.onSurface,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -122,7 +131,14 @@ class BodyHome extends StatelessWidget {
                         ElevatedButton(
                           onPressed: () =>
                               context.read<ProductsCubit>().getProducts(),
-                          child: const Text('Volver a cargar'),
+                          child: Text(
+                            'Volver a cargar',
+                            style: TextStyle(
+                              color: theme.colorScheme.onSurface,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -169,6 +185,12 @@ class PaginationControls extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ProductsCubit, ProductsState>(
       builder: (context, state) {
+        final cubit = context.read<ProductsCubit>();
+
+        if (cubit.hasActiveFilters) {
+          return const SizedBox.shrink();
+        }
+
         if (state is ProductsLoading) {
           return const SizedBox.shrink();
         }
@@ -241,15 +263,11 @@ class _SearchWidgetState extends State<SearchWidget> {
 
   void _showFilterDialog() {
     final cubit = context.read<ProductsCubit>();
-    final categories = cubit.getAvailableCategories();
-    final brands = cubit.getAvailableBrands();
 
     showDialog(
       context: context,
       builder: (context) => FilterDialog(
         cubit: cubit,
-        categories: categories,
-        brands: brands,
       ),
     );
   }
@@ -311,6 +329,11 @@ class _SearchWidgetState extends State<SearchWidget> {
                             });
                           },
                           textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: AppColors.darkgray,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400,
+                          ),
                           decoration: InputDecoration(
                             hintText: '¿Qué buscas?',
                             hintStyle: const TextStyle(
@@ -338,15 +361,12 @@ class _SearchWidgetState extends State<SearchWidget> {
                   ),
                 ),
               ),
-
               const SizedBox(width: AppSpaces.m10),
-
-              // Botón de filtro con indicador cuando hay filtros activos
+              // Botón de filtro
               BlocBuilder<ProductsCubit, ProductsState>(
                 builder: (context, state) {
                   final hasActiveFilters = state is ProductsSuccess &&
                       (context.read<ProductsCubit>().hasActiveFilters);
-
                   return Badge(
                     isLabelVisible: hasActiveFilters,
                     backgroundColor: AppColors.lila,
